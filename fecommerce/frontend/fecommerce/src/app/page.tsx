@@ -1,8 +1,13 @@
 import { Card, Button, Image } from "@nextui-org/react";
 
-const Home: React.FC = () => {
+const Home: React.FC = async () => {
   const products = new Array(6).fill(0);
 
+  const data = await fetch('https://api.example.com/...').then((res) =>
+    res.json()
+  );
+
+  
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="p-4 border-b border-gray-200">
