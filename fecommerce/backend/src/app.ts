@@ -19,7 +19,7 @@ export async function bootstrap(port = 3001) {
   // register routes here
   // ...
 
-  app.get('/products', async request => {
+  app.get('/api/products', async request => {
     const { limit, offset } = request.query as { limit?: number; offset?: number };
     const [items, total] = await orm.em.findAndCount(Product, {}, {
       limit, offset,

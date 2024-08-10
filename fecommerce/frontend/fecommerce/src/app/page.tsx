@@ -1,15 +1,28 @@
+'use client';
+
 import { Card, Button, Image } from "@nextui-org/react";
 import "./page.css";
 import logo from "../../public/Logo.png";
 import cart from "../../public/Shopping bag.png";
-import product from "../../public/product photo.jpg";
+import productPlaceholder from "../../public/product photo.jpg";
+import { useState, useEffect } from "react";
 
-const Home: React.FC = async () => {
-  const products = new Array(6).fill(0);
+const Home: React.FC = () => {
+  const [products, setProducts] = useState([]);
 
-  //const data = await fetch('https://localhost:3001/products').then((res) =>
-  //  res.json()
-  //);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/products');
+        const data = await response.json();
+        setProducts(data.items);  // Update state with fetched products
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      }
+    };
+    
+    fetchData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white">
@@ -26,38 +39,36 @@ const Home: React.FC = async () => {
       <main className="product-page">
         <div className="hero-image">
           <img
-            src={product.src}
+            src={productPlaceholder.src}
             alt="Hero"
             className="w-full h-full object-cover rounded-lg"
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
-          {products.map((_, index) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {products.map((product, index) => (
             <Card key={index} className="product-card">
-            <div className="p-4">
-              <img
-                src={product.src}
-                className="w-full h-40 object-cover rounded-lg"
-                alt="Product Image"
-              />
-              <h4 className="text-xl font-bold mt-4">Product Name {index}</h4>
-              <p className="text-gray-500 mt-2">
-                Product description goes here. Lorem ipsum dolor sit amet,
-                consectetur adipiscing elit...
-              </p>
-              <div className="flex items-center justify-between mt-4">
-                <span className="text-xl font-bold">$189.99</span>
-                <div className="flex items-center">
-                  <button className="bg-gray-200 rounded-l px-2">-</button>
-                  <span className="px-2">5</span>
-                  <button className="bg-gray-200 rounded-r px-2">+</button>
+              <div className="p-4">
+                <img
+                  src={product.img}
+                  className="w-full h-40 object-cover rounded-lg"
+                  alt={product.name}
+                />
+                <h4 className="text-xl font-bold mt-4">{product.name}</h4>
+                <p className="text-gray-500 mt-2">
+                  {product.description}
+                </p>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
+                  <div className="flex items-center">
+                    <button className="bg-gray-200 rounded-l px-2">-</button>
+                    <span className="px-2">5</span>
+                    <button className="bg-gray-200 rounded-r px-2">+</button>
+                  </div>
+                  <Button size="sm">Add to Cart</Button>
                 </div>
-                <Button size="sm">Add to Cart</Button>
               </div>
-            </div>
-          </Card>
-          
+            </Card>
           ))}
         </div>
       </main>
