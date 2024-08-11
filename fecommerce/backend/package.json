@@ -1,7 +1,8 @@
 {
-  "type":"module",
+  "type": "module",
   "dependencies": {
     "@mikro-orm/core": "^6.3.4",
+    "@mikro-orm/mongodb": "^6.3.4",
     "@mikro-orm/reflection": "^6.3.4",
     "@mikro-orm/sqlite": "^6.3.4",
     "fastify": "^4.28.1"
