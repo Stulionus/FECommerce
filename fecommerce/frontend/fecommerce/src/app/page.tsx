@@ -6,6 +6,9 @@ import logo from "../../public/Logo.png";
 import cart from "../../public/Shopping bag.png";
 import productPlaceholder from "../../public/product photo.jpg";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import './page.css'; // Make sure you have the relevant styles here
+import React from "react";
 
 const Home: React.FC = () => {
   const [products, setProducts] = useState([]);
@@ -15,7 +18,7 @@ const Home: React.FC = () => {
       try {
         const response = await fetch('/api/products');
         const data = await response.json();
-        setProducts(data.items);  // Update state with fetched products
+        setProducts(data.items);
       } catch (error) {
         console.error('Error fetching products:', error);
       }
@@ -25,18 +28,7 @@ const Home: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="header">
-        <div>
-          <img src={logo.src} alt="logo" className="navbar-logo" />
-        </div>
-        <h1 className="navbar-text">Not Amazon</h1>
-        <div className="cart">
-          <img src={cart.src} alt="cart" className="navbar-cart" />
-        </div>
-      </header>
-
-      <main className="product-page">
+      <div className="product-page">
         <div className="hero-image">
           <img
             src={productPlaceholder.src}
@@ -48,9 +40,12 @@ const Home: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {products.map((product, index) => (
             <Card key={index} className="product-card">
+              <Link href="/product">
               <div className="p-4">
                 <img
                   src={product.img}
+                  width={160}
+                  height={160}
                   className="w-full h-40 object-cover rounded-lg"
                   alt={product.name}
                 />
@@ -68,11 +63,11 @@ const Home: React.FC = () => {
                   <Button size="sm">Add to Cart</Button>
                 </div>
               </div>
+              </Link>
             </Card>
           ))}
         </div>
-      </main>
-    </div>
+      </div>
   );
 };
 
