@@ -8,6 +8,7 @@ import { CartItem } from './modules/cartItem/cartItem.entity.js';
 
 export async function bootstrap(port = 3001) {
   const app = fastify();
+  
 
   const orm = await MikroORM.init({
     entities: [Product, Cart],
@@ -21,29 +22,28 @@ export async function bootstrap(port = 3001) {
 
   const addToCart = async (productId: string) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
-    
+
     try {
 
       const cart = await em.findOne(Cart, { _id: cartId }, {
         populate: ['items.product']
       });
-  
+
       if (!cart) {
         console.log('Cart not found');
         return;
       }
-  
 
       const product = await em.findOne(Product, { _id: new ObjectId(productId) });
-  
+
       if (!product) {
         console.log('Product not found');
         return;
       }
-  
+
 
       let cartItem = cart.items.getItems().find(item => item.product._id.equals(product._id));
-  
+
       if (cartItem) {
 
         cartItem.quantity += 1;
@@ -54,10 +54,10 @@ export async function bootstrap(port = 3001) {
         cartItem.quantity = 1;
         cart.items.add(cartItem);
       }
-  
+
 
       cart.quantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
-  
+
 
       await em.persistAndFlush(cart);
       console.log('Cart updated with product:', product);
@@ -65,33 +65,31 @@ export async function bootstrap(port = 3001) {
       console.error('Error adding product to cart:', error);
     }
   };
-  
-  //await addToCart('66b8476e4484fba2e6451565');
 
   const removeFromCart = async (productId: string) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
-    
+
     try {
 
       const cart = await em.findOne(Cart, { _id: cartId }, {
         populate: ['items.product']
       });
-  
+
       if (!cart) {
         console.log('Cart not found');
         return;
       }
-  
+
 
       const product = await em.findOne(Product, { _id: new ObjectId(productId) });
-  
+
       if (!product) {
         console.log('Product not found');
         return;
       }
 
       const cartItem = cart.items.getItems().find(item => item.product._id.equals(product._id));
-  
+
       if (cartItem) {
 
         if (cartItem.quantity > 1) {
@@ -99,10 +97,10 @@ export async function bootstrap(port = 3001) {
         } else {
           cart.items.remove(cartItem);
         }
-  
+
 
         cart.quantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
-  
+
         await em.persistAndFlush(cart);
         console.log('Cart updated by removing product:', product);
       } else {
@@ -133,7 +131,7 @@ export async function bootstrap(port = 3001) {
     await orm.close();
   });
 
-  // app.post('/api/cart', async (request, reply) => {
+  // app.post('/api/cart/', async (request, reply) => {
   //   const { productId, quantity } = request.body as { productId: string; quantity: number };
 
   //   if (!productId || quantity === undefined) {
@@ -157,30 +155,63 @@ export async function bootstrap(port = 3001) {
   //   }
   // });
 
+  // Add to cart
+  app.post('/api/cart/add', async (request, reply) => {
+    const { productId } = request.body as { productId: string };
+
+    if (!productId) {
+      return reply.status(400).send({ error: 'Missing productId' });
+    }
+
+    try {
+      await addToCart(productId);
+      reply.status(200).send({ success: true });
+    } catch (error) {
+      reply.status(500).send({ error: 'Error adding item to cart' });
+    }
+  });
+
+  // Remove from cart
+  app.post('/api/cart/remove', async (request, reply) => {
+    const { productId } = request.body as { productId: string };
+
+    if (!productId) {
+      return reply.status(400).send({ error: 'Missing productId' });
+    }
+
+    try {
+      await removeFromCart(productId);
+      reply.status(200).send({ success: true });
+    } catch (error) {
+      reply.status(500).send({ error: 'Error removing item from cart' });
+    }
+  });
+
+
 
   app.get('/api/cart', async (request, reply) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
-    
+
     try {
       const cart = await em.findOne(Cart, { _id: cartId }, {
         populate: ['items.product']
       });
-  
+
       if (!cart) {
         reply.status(404).send({ error: 'Cart not found' });
         return;
       }
-  
+
       const totalQuantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
-      
+
       cart.quantity = totalQuantity;
-  
+
       reply.send(cart);
     } catch (error) {
       reply.status(500).send({ error: 'Error fetching cart' });
     }
   });
-  
+
 
   app.get('/api/products', async (request, reply) => {
     const { limit, offset } = request.query as { limit?: number; offset?: number };

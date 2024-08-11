@@ -1,20 +1,18 @@
 'use client';
 
-import { Card, Button, Image } from "@nextui-org/react";
+import { Card, Button } from "@nextui-org/react";
 import "./page.css";
-import logo from "../../public/Logo.png";
-import cart from "../../public/Shopping bag.png";
 import productPlaceholder from "../../public/product photo.jpg";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import './page.css'; // Make sure you have the relevant styles here
 import React from "react";
 
 const Home: React.FC = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [cart, setCart] = useState<{ [key: string]: number }>({}); // {productId: quantity}
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProducts = async () => {
       try {
         const response = await fetch('/api/products');
         const data = await response.json();
@@ -23,25 +21,76 @@ const Home: React.FC = () => {
         console.error('Error fetching products:', error);
       }
     };
-    
-    fetchData();
+
+    const fetchCart = async () => {
+      try {
+        const response = await fetch('/api/cart');
+        const data = await response.json();
+        const cartItems = data.items.reduce((acc: { [key: string]: number }, item: any) => {
+          acc[item.product.id] = item.quantity;
+          return acc;
+        }, {});
+        setCart(cartItems);
+      } catch (error) {
+        console.error('Error fetching cart:', error);
+      }
+    };
+
+    fetchProducts();
+    fetchCart();
   }, []);
 
-  return (
-      <div className="product-page">
-        <div className="hero-image">
-          <img
-            src={productPlaceholder.src}
-            alt="Hero"
-            className="w-full h-full object-cover rounded-lg"
-          />
-        </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {products.map((product, index) => (
-            <Card key={index} className="product-card">
-              <Link href="/product">
-              <div className="p-4">
+  const addToCart = async (productId: string) => {
+    try {
+      await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      setCart(prevCart => ({ ...prevCart, [productId]: (prevCart[productId] || 0) + 1 }));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  const removeFromCart = async (productId: string) => {
+    try {
+      await fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      // Update local state after successful removal
+      setCart(prevCart => {
+        const newCart = { ...prevCart };
+        if (newCart[productId] > 1) {
+          newCart[productId] -= 1;
+        } else {
+          delete newCart[productId];
+        }
+        return newCart;
+      });
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+    }
+  };
+
+  return (
+    <div className="product-page">
+      <div className="hero-image">
+        <img
+          src={productPlaceholder.src}
+          alt="Hero"
+          className="w-full h-full object-cover rounded-lg"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {products.map((product: any) => (
+          <Card key={product.id} className="product-card">
+            <div className="p-4">
+              <Link href={`/product/${product.id}`}>
                 <img
                   src={product.img}
                   width={160}
@@ -50,24 +99,25 @@ const Home: React.FC = () => {
                   alt={product.name}
                 />
                 <h4 className="text-xl font-bold mt-4">{product.name}</h4>
-                <p className="text-gray-500 mt-2">
-                  {product.description}
-                </p>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
-                  <div className="flex items-center">
-                    <button className="bg-gray-200 rounded-l px-2">-</button>
-                    <span className="px-2">5</span>
-                    <button className="bg-gray-200 rounded-r px-2">+</button>
-                  </div>
-                  <Button size="sm">Add to Cart</Button>
-                </div>
-              </div>
+                <p className="text-gray-500 mt-2">{product.description}</p>
               </Link>
-            </Card>
-          ))}
-        </div>
+              <div className="flex items-center justify-between mt-4">
+                <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
+                {cart[product.id] ? (
+                  <div className="flex items-center">
+                    <button onClick={() => removeFromCart(product.id)} className="bg-gray-200 rounded-l px-2">-</button>
+                    <span className="px-2">{cart[product.id]}</span>
+                    <button onClick={() => addToCart(product.id)} className="bg-gray-200 rounded-r px-2">+</button>
+                  </div>
+                ) : (
+                  <Button size="sm" onClick={() => addToCart(product.id)}>Add to Cart</Button>
+                )}
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
+    </div>
   );
 };
 

@@ -1,1 +1,15 @@
 GET http://localhost:3000/api/cart
+
+POST http://localhost:3000/api/cart/add
+Content-Type: application/json
+
+{
+  "productId": "12345"
+}
+
+
+POST http://localhost:3001/api/cart/remove
+Content-Type: application/json
+{"productId":"66b8476e4484fba2e6451565"}
+
+

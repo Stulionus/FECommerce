@@ -20,8 +20,9 @@ const Layout = ({ children }: LayoutProps) => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const cartItems = await response.json();
-        const totalItems = cartItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
+        const cart = await response.json();
+        // Calculate total quantity from cart items
+        const totalItems = cart.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
         setCartCount(totalItems);
       } catch (error) {
         console.error('Error fetching cart data:', error);
