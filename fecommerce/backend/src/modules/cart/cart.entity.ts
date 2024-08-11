@@ -7,7 +7,7 @@ export class Cart {
    @PrimaryKey()
    _id!: number;
 
-   @ManyToOne(() => Product)
+   @ManyToOne(() => Product, { nullable: true })
    product!: Product;
 
    @Property()

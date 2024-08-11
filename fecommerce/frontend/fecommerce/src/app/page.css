@@ -29,6 +29,7 @@
     margin-right: 16px;
     display: flex;
     align-items: center;
+    position: relative;
 }
 
 .product-page{
@@ -55,4 +56,19 @@
 .grid{
     column-gap: 100px;
     row-gap: 50px;
+}
+
+.cart-count {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center; /* Centers horizontally */
+    align-items: center;    /* Centers vertically */
+    position: absolute;     /* Allows precise positioning */
+    top: -10px;             /* Adjust as needed */
+    right: -10px;           /* Adjust as needed */
+    border-radius: 50%;     /* Makes the div a circle */
+    font-size: 14px;
+    background: #F31260;
+    color: white;
 }

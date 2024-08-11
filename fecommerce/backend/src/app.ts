@@ -25,25 +25,6 @@ export async function bootstrap(port = 3001) {
     console.error('Error fetching all products:', error);
   }
 
-  try {
-    const productId = '66b82de2048e83a65596529c';
-    const product = await em.getCollection('Product').findOne({ _id: new ObjectId(productId) });
-    if (product) {
-      console.log('Product found:', product._id, product.name);
-    } else {
-      console.log('Product not found');
-    }
-  } catch (error) {
-    console.error('Error finding product:', error);
-  }
-
-  const p1 = new Product();
-  p1.name = 'Product 1';
-  p1.description = 'Description of product 1';
-  p1.price = 100;
-  p1.img = 'https://via.placeholder'
-  em.insert(p1);
-
   // Register request context hook
   app.addHook('onRequest', (request, reply, done) => {
     RequestContext.create(orm.em, done);
@@ -54,16 +35,55 @@ export async function bootstrap(port = 3001) {
     await orm.close();
   });
 
-  // Register routes here
-  // ...
-
-  app.get('/api/products', async request => {
-    const { limit, offset } = request.query as { limit?: number; offset?: number };
-    const [items, total] = await orm.em.findAndCount(Product, {}, {
-      limit, offset,
-    });
+  app.post('/api/cart', async (request, reply) => {
+    const { productId, quantity } = request.body as { productId: string; quantity: number };
   
-    return { items, total };
+    if (!productId || quantity === undefined) {
+      return reply.status(400).send({ error: 'Missing productId or quantity' });
+    }
+  
+    try {
+      const product = await em.findOne(Product, { _id: new ObjectId(productId) });
+      if (!product) {
+        return reply.status(404).send({ error: 'Product not found' });
+      }
+  
+      const cartItem = new Cart();
+      cartItem.product = product;
+      cartItem.quantity = quantity;
+  
+      await em.persistAndFlush(cartItem);
+      reply.status(201).send(cartItem);
+    } catch (error) {
+      reply.status(500).send({ error: 'Error adding item to cart' });
+    }
+  });
+  
+
+  app.get('/api/cart', async (request, reply) => {
+    try {
+      const cartItems = await em.find(Cart, {}, {
+        populate: ['product'],
+      });
+  
+      reply.send(cartItems);
+    } catch (error) {
+      reply.status(500).send({ error: 'Error fetching cart items' });
+    }
+  });  
+
+
+  app.get('/api/products', async (request, reply) => {
+    const { limit, offset } = request.query as { limit?: number; offset?: number };
+    
+    try {
+      const [items, total] = await em.findAndCount(Product, {}, {
+        limit, offset,
+      });
+      reply.send({ items, total });
+    } catch (error) {
+      reply.status(500).send({ error: 'Error fetching products' });
+    }
   });
 
   const url = await app.listen({ port });
