@@ -8,7 +8,6 @@ import { CartItem } from './modules/cartItem/cartItem.entity.js';
 
 export async function bootstrap(port = 3001) {
   const app = fastify();
-  
 
   const orm = await MikroORM.init({
     entities: [Product, Cart],
@@ -24,7 +23,6 @@ export async function bootstrap(port = 3001) {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
 
     try {
-
       const cart = await em.findOne(Cart, { _id: cartId }, {
         populate: ['items.product']
       });
@@ -41,23 +39,18 @@ export async function bootstrap(port = 3001) {
         return;
       }
 
-
       let cartItem = cart.items.getItems().find(item => item.product._id.equals(product._id));
 
       if (cartItem) {
-
         cartItem.quantity += 1;
       } else {
-
         cartItem = new CartItem();
         cartItem.product = product;
         cartItem.quantity = 1;
         cart.items.add(cartItem);
       }
 
-
       cart.quantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
-
 
       await em.persistAndFlush(cart);
       console.log('Cart updated with product:', product);
@@ -70,7 +63,6 @@ export async function bootstrap(port = 3001) {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
 
     try {
-
       const cart = await em.findOne(Cart, { _id: cartId }, {
         populate: ['items.product']
       });
@@ -79,7 +71,6 @@ export async function bootstrap(port = 3001) {
         console.log('Cart not found');
         return;
       }
-
 
       const product = await em.findOne(Product, { _id: new ObjectId(productId) });
 
@@ -91,13 +82,11 @@ export async function bootstrap(port = 3001) {
       const cartItem = cart.items.getItems().find(item => item.product._id.equals(product._id));
 
       if (cartItem) {
-
         if (cartItem.quantity > 1) {
           cartItem.quantity -= 1;
         } else {
           cart.items.remove(cartItem);
         }
-
 
         cart.quantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
 
@@ -150,8 +139,6 @@ export async function bootstrap(port = 3001) {
     }
   });
 
-
-
   app.get('/api/cart', async (request, reply) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
 
@@ -175,7 +162,6 @@ export async function bootstrap(port = 3001) {
     }
   });
 
-
   app.get('/api/products', async (request, reply) => {
     const { limit, offset } = request.query as { limit?: number; offset?: number };
 
@@ -186,6 +172,24 @@ export async function bootstrap(port = 3001) {
       reply.send({ items, total });
     } catch (error) {
       reply.status(500).send({ error: 'Error fetching products' });
+    }
+  });
+
+  // New endpoint to fetch a single product by ID
+  app.get('/api/product/:id', async (request, reply) => {
+    const { id } = request.params as { id: string };
+
+    try {
+      const product = await em.findOne(Product, { _id: new ObjectId(id) });
+
+      if (!product) {
+        reply.status(404).send({ error: 'Product not found' });
+        return;
+      }
+
+      reply.send(product);
+    } catch (error) {
+      reply.status(500).send({ error: 'Error fetching product' });
     }
   });
 
