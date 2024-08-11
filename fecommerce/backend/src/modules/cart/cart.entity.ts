@@ -1,14 +1,16 @@
-import { Entity, PrimaryKey, OneToMany, Collection, LoadStrategy } from '@mikro-orm/core';
+import { Entity, PrimaryKey, OneToMany, Collection} from '@mikro-orm/core';
 import { CartItem } from '../cartItem/cartItem.entity.js';
 import { Property } from '@mikro-orm/core';
+import { ManyToMany } from '@mikro-orm/core';
+import { ObjectId } from 'bson';
 
 @Entity()
 export class Cart {
 
    @PrimaryKey()
-   _id!: number;
+   _id!: ObjectId;
 
-   @OneToMany(() => CartItem, cartItem => cartItem.cart, { orphanRemoval: true})
+   @ManyToMany({entity: () => CartItem, owner: true})
    items = new Collection<CartItem>(this);
 
    @Property()

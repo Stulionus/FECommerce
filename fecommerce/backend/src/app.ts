@@ -19,33 +19,101 @@ export async function bootstrap(port = 3001) {
 
   const em = orm.em.fork() as EntityManager;
 
-  // const createCartWithItems = async () => {
-  //   // Create a new cart
-  //   const cart = new Cart();
-  //   cart.quantity = 0;
+  const addToCart = async (productId: string) => {
+    const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
+    
+    try {
 
-  //   // Fetch products from the database
-  //   const product = await em.findOne(Product, { _id: new ObjectId('66b8476e4484fba2e6451565')}); // Example product ID
+      const cart = await em.findOne(Cart, { _id: cartId }, {
+        populate: ['items.product']
+      });
   
-  //   if (product) {
-  //     // Create cart items
-  //     const cartItem = new CartItem();
-  //     cartItem.product = product;
-  //     cartItem.quantity = 2; // Example quantity
-  //     cartItem.cart = cart;
+      if (!cart) {
+        console.log('Cart not found');
+        return;
+      }
   
-  //     // Add items to cart
-  //     cart.items.add(cartItem);
-      
-  //     // Persist the cart and items
-  //     await em.persistAndFlush(cart);
-  //     console.log('Cart created with items:', cart);
-  //   } else {
-  //     console.log('Product not found');
-  //   }
-  // };
 
-  // await createCartWithItems();
+      const product = await em.findOne(Product, { _id: new ObjectId(productId) });
+  
+      if (!product) {
+        console.log('Product not found');
+        return;
+      }
+  
+
+      let cartItem = cart.items.getItems().find(item => item.product._id.equals(product._id));
+  
+      if (cartItem) {
+
+        cartItem.quantity += 1;
+      } else {
+
+        cartItem = new CartItem();
+        cartItem.product = product;
+        cartItem.quantity = 1;
+        cart.items.add(cartItem);
+      }
+  
+
+      cart.quantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
+  
+
+      await em.persistAndFlush(cart);
+      console.log('Cart updated with product:', product);
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
+  };
+  
+  //await addToCart('66b8476e4484fba2e6451565');
+
+  const removeFromCart = async (productId: string) => {
+    const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
+    
+    try {
+
+      const cart = await em.findOne(Cart, { _id: cartId }, {
+        populate: ['items.product']
+      });
+  
+      if (!cart) {
+        console.log('Cart not found');
+        return;
+      }
+  
+
+      const product = await em.findOne(Product, { _id: new ObjectId(productId) });
+  
+      if (!product) {
+        console.log('Product not found');
+        return;
+      }
+
+      const cartItem = cart.items.getItems().find(item => item.product._id.equals(product._id));
+  
+      if (cartItem) {
+
+        if (cartItem.quantity > 1) {
+          cartItem.quantity -= 1;
+        } else {
+          cart.items.remove(cartItem);
+        }
+  
+
+        cart.quantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
+  
+        await em.persistAndFlush(cart);
+        console.log('Cart updated by removing product:', product);
+      } else {
+        console.log('Cart item not found');
+      }
+    } catch (error) {
+      console.error('Error removing product from cart:', error);
+    }
+  };
+
+  //await removeFromCart('66b8476e4484fba2e6451565');
 
   // try {
   //   const allProducts = await em.find(Product, {});
@@ -90,18 +158,29 @@ export async function bootstrap(port = 3001) {
   // });
 
 
-  // app.get('/api/cart', async (request, reply) => {
-  //   try {
-  //     const cartItems = await em.find(Cart, {}, {
-  //       populate: ['product'],
-  //     });
-
-  //     reply.send(cartItems);
-  //   } catch (error) {
-  //     reply.status(500).send({ error: 'Error fetching cart items' });
-  //   }
-  // });
-
+  app.get('/api/cart', async (request, reply) => {
+    const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
+    
+    try {
+      const cart = await em.findOne(Cart, { _id: cartId }, {
+        populate: ['items.product']
+      });
+  
+      if (!cart) {
+        reply.status(404).send({ error: 'Cart not found' });
+        return;
+      }
+  
+      const totalQuantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
+      
+      cart.quantity = totalQuantity;
+  
+      reply.send(cart);
+    } catch (error) {
+      reply.status(500).send({ error: 'Error fetching cart' });
+    }
+  });
+  
 
   app.get('/api/products', async (request, reply) => {
     const { limit, offset } = request.query as { limit?: number; offset?: number };

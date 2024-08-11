@@ -12,9 +12,6 @@ export class CartItem {
    @ManyToOne(() => Product)
    product!: Product;
 
-   @ManyToOne(() => Cart)
-   cart!: Rel<Cart>;
-
    @Property()
    quantity!: number;
 }
