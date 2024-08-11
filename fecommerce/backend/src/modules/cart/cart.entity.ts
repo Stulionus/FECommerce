@@ -1,5 +1,6 @@
-import { Entity, PrimaryKey, Property, ManyToOne } from '@mikro-orm/core';
-import { Product } from '../product/product.entity.js';
+import { Entity, PrimaryKey, OneToMany, Collection, LoadStrategy } from '@mikro-orm/core';
+import { CartItem } from '../cartItem/cartItem.entity.js';
+import { Property } from '@mikro-orm/core';
 
 @Entity()
 export class Cart {
@@ -7,10 +8,9 @@ export class Cart {
    @PrimaryKey()
    _id!: number;
 
-   @ManyToOne(() => Product, { nullable: true })
-   product!: Product;
+   @OneToMany(() => CartItem, cartItem => cartItem.cart, { orphanRemoval: true})
+   items = new Collection<CartItem>(this);
 
    @Property()
    quantity!: number;
-
 }
