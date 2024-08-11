@@ -1,0 +1,24 @@
+.cart-page {
+    padding: 20px;
+  }
+  
+  .cart-summary {
+    margin-bottom: 20px;
+  }
+  
+  .cart-items {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .cart-item {
+    margin-bottom: 15px;
+  }
+  
+  .cart-item h3 {
+    margin: 0;
+  }
+  
+  .cart-item p {
+    margin: 5px 0;
+  }
