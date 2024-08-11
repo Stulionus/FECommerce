@@ -1,18 +1,19 @@
 import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { ObjectId } from '@mikro-orm/mongodb';
 
 @Entity()
 export class Product{
 
    @PrimaryKey()
-   id!: number;
+  _id!: ObjectId;
 
    @Property()
    name!: string;
 
-   @Property({ type: 'text' })
-   description = '';
+   @Property()
+   description!: string;
 
-   @Property({ type: 'float' })
+   @Property({ type: 'double' })
    price = 0.0;
 
    @Property()

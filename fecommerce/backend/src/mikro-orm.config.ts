@@ -1,10 +1,11 @@
 import { Options, SqliteDriver } from '@mikro-orm/sqlite';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
+import { MongoDriver } from '@mikro-orm/mongodb';
 
 const config: Options = {
   // for simplicity, we use the SQLite database, as it's available pretty much everywhere
   driver: SqliteDriver,
-  dbName: 'sqlite.db',
+  dbName: 'FEcommerce.Product',
   // folder-based discovery setup, using common filename suffix
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],

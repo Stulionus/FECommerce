@@ -22,7 +22,7 @@ const ProductPage = () => {
               Description
             </p>
             <div className="flex items-center justify-between mt-4">
-              <span className="text-xl font-bold">999</span>
+              <span className="text-xl font-bold">999</span >
               <Button size="sm">Add to Cart</Button>
             </div>
           </div>

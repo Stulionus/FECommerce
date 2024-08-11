@@ -5,7 +5,7 @@ import { Product } from '../product/product.entity.js';
 export class Cart {
 
    @PrimaryKey()
-   id!: number;
+   _id!: number;
 
    @ManyToOne(() => Product)
    product!: Product;
