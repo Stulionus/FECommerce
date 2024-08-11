@@ -111,51 +111,14 @@ export async function bootstrap(port = 3001) {
     }
   };
 
-  //await removeFromCart('66b8476e4484fba2e6451565');
-
-  // try {
-  //   const allProducts = await em.find(Product, {});
-  //   console.log('All products:', allProducts);
-  // } catch (error) {
-  //   console.error('Error fetching all products:', error);
-  // }
-
-
-  // Register request context hook
   app.addHook('onRequest', (request, reply, done) => {
     RequestContext.create(orm.em, done);
   });
 
-  // Shut down the connection when closing the app
   app.addHook('onClose', async () => {
     await orm.close();
   });
 
-  // app.post('/api/cart/', async (request, reply) => {
-  //   const { productId, quantity } = request.body as { productId: string; quantity: number };
-
-  //   if (!productId || quantity === undefined) {
-  //     return reply.status(400).send({ error: 'Missing productId or quantity' });
-  //   }
-
-  //   try {
-  //     const product = await em.findOne(Product, { _id: new ObjectId(productId) });
-  //     if (!product) {
-  //       return reply.status(404).send({ error: 'Product not found' });
-  //     }
-
-  //     const cartItem = new Cart();
-  //     cartItem.product = product;
-  //     cartItem.quantity = quantity;
-
-  //     await em.persistAndFlush(cartItem);
-  //     reply.status(201).send(cartItem);
-  //   } catch (error) {
-  //     reply.status(500).send({ error: 'Error adding item to cart' });
-  //   }
-  // });
-
-  // Add to cart
   app.post('/api/cart/add', async (request, reply) => {
     const { productId } = request.body as { productId: string };
 

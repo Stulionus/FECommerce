@@ -61,7 +61,6 @@ const Home: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ productId })
       });
-      // Update local state after successful removal
       setCart(prevCart => {
         const newCart = { ...prevCart };
         if (newCart[productId] > 1) {
