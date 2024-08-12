@@ -44,26 +44,26 @@ const CartPage = () => {
   }, []);
 
   return (
-    <div className="cart-page">
-      <h2>Your Shopping Cart</h2>
-      <div className="cart-summary">
-        <p>Total Quantity: {totalQuantity}</p>
-        <p>Total Price: ${totalPrice.toFixed(2)}</p> {/* Format to two decimal places */}
+    <div className="container mx-auto p-8">
+      <h2 className="text-3xl font-bold mb-6">Your Shopping Cart</h2>
+      <div className="bg-gray-100 p-4 rounded-lg shadow-md mb-6">
+        <p className="text-lg font-medium">Total Quantity: <span className="font-bold">{totalQuantity}</span></p>
+        <p className="text-lg font-medium">Total Price: <span className="font-bold">${totalPrice.toFixed(2)}</span></p>
       </div>
-      <div className="cart-items">
+      <div className="bg-white p-4 rounded-lg shadow-md">
         {cartItems.length === 0 ? (
-          <p>Your cart is empty.</p>
+          <p className="text-gray-600">Your cart is empty.</p>
         ) : (
           cartItems.map((item) => (
-            <div key={item._id} className="cart-item">
+            <div key={item._id} className="border-b border-gray-200 py-4 last:border-b-0">
               {item.product ? (
                 <>
-                  <h3>{item.product.name}</h3>
-                  <p>Quantity: {item.quantity}</p>
-                  <p>Price: ${item.product.price.toFixed(2)}</p> {/* Format to two decimal places */}
+                  <h3 className="text-xl font-semibold mb-2">{item.product.name}</h3>
+                  <p className="text-sm text-gray-700">Quantity: <span className="font-semibold">{item.quantity}</span></p>
+                  <p className="text-sm text-gray-700">Price: <span className="font-semibold">${item.product.price.toFixed(2)}</span></p>
                 </>
               ) : (
-                <p>Product information is missing for this item.</p>
+                <p className="text-red-600">Product information is missing for this item.</p>
               )}
             </div>
           ))

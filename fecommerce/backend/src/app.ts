@@ -6,9 +6,11 @@ import { Cart } from './modules/cart/cart.entity.js';
 import { ObjectId } from 'bson';
 import { CartItem } from './modules/cartItem/cartItem.entity.js';
 
+// Initialize and configure the server
 export async function bootstrap(port = 3001) {
   const app = fastify();
 
+  // Initialize MikroORM
   const orm = await MikroORM.init({
     entities: [Product, Cart],
     dbName: 'FEcommerce',
@@ -19,13 +21,12 @@ export async function bootstrap(port = 3001) {
 
   const em = orm.em.fork() as EntityManager;
 
+  // Add product to the cart
   const addToCart = async (productId: string) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
 
     try {
-      const cart = await em.findOne(Cart, { _id: cartId }, {
-        populate: ['items.product']
-      });
+      const cart = await em.findOne(Cart, { _id: cartId }, { populate: ['items.product'] });
 
       if (!cart) {
         console.log('Cart not found');
@@ -59,13 +60,12 @@ export async function bootstrap(port = 3001) {
     }
   };
 
+  // Remove product from the cart
   const removeFromCart = async (productId: string) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
 
     try {
-      const cart = await em.findOne(Cart, { _id: cartId }, {
-        populate: ['items.product']
-      });
+      const cart = await em.findOne(Cart, { _id: cartId }, { populate: ['items.product'] });
 
       if (!cart) {
         console.log('Cart not found');
@@ -100,14 +100,17 @@ export async function bootstrap(port = 3001) {
     }
   };
 
+  // Middleware to set up request context for MikroORM
   app.addHook('onRequest', (request, reply, done) => {
     RequestContext.create(orm.em, done);
   });
 
+  // Close MikroORM connection when server shuts down
   app.addHook('onClose', async () => {
     await orm.close();
   });
 
+  // Endpoint to add a product to the cart
   app.post('/api/cart/add', async (request, reply) => {
     const { productId } = request.body as { productId: string };
 
@@ -123,7 +126,7 @@ export async function bootstrap(port = 3001) {
     }
   });
 
-  // Remove from cart
+  // Endpoint to remove a product from the cart
   app.post('/api/cart/remove', async (request, reply) => {
     const { productId } = request.body as { productId: string };
 
@@ -139,13 +142,12 @@ export async function bootstrap(port = 3001) {
     }
   });
 
+  // Endpoint to get the current state of the cart
   app.get('/api/cart', async (request, reply) => {
     const cartId = new ObjectId('66b8f6fcc9631e3241dbe624');
 
     try {
-      const cart = await em.findOne(Cart, { _id: cartId }, {
-        populate: ['items.product']
-      });
+      const cart = await em.findOne(Cart, { _id: cartId }, { populate: ['items.product'] });
 
       if (!cart) {
         reply.status(404).send({ error: 'Cart not found' });
@@ -153,7 +155,6 @@ export async function bootstrap(port = 3001) {
       }
 
       const totalQuantity = cart.items.getItems().reduce((sum, item) => sum + item.quantity, 0);
-
       cart.quantity = totalQuantity;
 
       reply.send(cart);
@@ -162,20 +163,19 @@ export async function bootstrap(port = 3001) {
     }
   });
 
+  // Endpoint to fetch a list of products
   app.get('/api/products', async (request, reply) => {
     const { limit, offset } = request.query as { limit?: number; offset?: number };
 
     try {
-      const [items, total] = await em.findAndCount(Product, {}, {
-        limit, offset,
-      });
+      const [items, total] = await em.findAndCount(Product, {}, { limit, offset });
       reply.send({ items, total });
     } catch (error) {
       reply.status(500).send({ error: 'Error fetching products' });
     }
   });
 
-  // New endpoint to fetch a single product by ID
+  // Endpoint to fetch a single product by ID
   app.get('/api/product/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
 
@@ -193,6 +193,7 @@ export async function bootstrap(port = 3001) {
     }
   });
 
+  // Start the server and listen on the specified port
   const url = await app.listen({ port });
   console.log(`Server listening at ${url}`);
 
