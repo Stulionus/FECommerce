@@ -87,19 +87,18 @@ const Home: React.FC = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {products.map((product: any) => (
-          <Card key={product.id} className="product-card">
-            <div className="p-4">
+          <Card key={product.id} className="product-card flex flex-col justify-between">
+            <div className="p-4 flex flex-col flex-grow">
               <Link href={`/product/${product.id}`}>
                 <img
                   src={product.img}
-                  width={160}
-                  height={160}
                   className="w-full h-40 object-cover rounded-lg"
                   alt={product.name}
                 />
-                <h4 className="text-xl font-bold mt-4">{product.name}</h4>
-                <p className="text-gray-500 mt-2">{product.description}</p>
+                <h4 className="text-xl font-bold mt-4 line-clamp-1">{product.name}</h4>
+                <p className="text-gray-500 mt-2 line-clamp-4">{product.description}</p>
               </Link>
+              <div className="flex-grow"></div>
               <div className="flex items-center justify-between mt-4">
                 <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
                 {cart[product.id] ? (

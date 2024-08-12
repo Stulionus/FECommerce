@@ -21,7 +21,6 @@ const Layout = ({ children }: LayoutProps) => {
           throw new Error('Network response was not ok');
         }
         const cart = await response.json();
-        // Calculate total quantity from cart items
         const totalItems = cart.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
         setCartCount(totalItems);
       } catch (error) {
@@ -33,9 +32,9 @@ const Layout = ({ children }: LayoutProps) => {
   }, []);
 
   return (
-    <html>
+    <html lang="en">
       <body>
-        <div className="min-h-screen bg-white">
+        <div className="page-container">
           <header className="header">
             <div>
               <Link href="/">

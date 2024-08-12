@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+
+.page-container {
+    width: 1440px;
+    margin: 0 auto;
+    min-height: 100vh;
+    background-color: #fff;
+  }
+
+  
 .header {
     height: 64px;
     background-color: white;
@@ -71,4 +80,8 @@
     font-size: 14px;
     background: #F31260;
     color: white;
+}
+
+.p-4 {
+    width: 100%;
 }

@@ -1,17 +1,20 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { Card, Button } from "@nextui-org/react";
 import '../../page.css';
 import photoPlaceholder from '../../../../public/product photo.jpg';
 import React from 'react';
+import Link from 'next/link';
 
 const ProductPage = () => {
   const [product, setProduct] = useState<any>(null);
+  const [similarProducts, setSimilarProducts] = useState<any[]>([]);
+  const [cart, setCart] = useState<{ [key: string]: number }>({}); // {productId: quantity}
 
   useEffect(() => {
     const url = new URL(window.location.href);
     const id = url.pathname.split('/').pop();
-    console.log(id);
     if (id) {
       const fetchProduct = async () => {
         try {
@@ -23,9 +26,70 @@ const ProductPage = () => {
         }
       };
 
+      const fetchSimilarProducts = async () => {
+        try {
+          const response = await fetch('/api/products');
+          const data = await response.json();
+          const filteredProducts = data.items.filter((item: any) => item.id !== id);
+          setSimilarProducts(filteredProducts);
+        } catch (error) {
+          console.error('Error fetching similar products:', error);
+        }
+      };
+
+      const fetchCart = async () => {
+        try {
+          const response = await fetch('/api/cart');
+          const data = await response.json();
+          const cartItems = data.items.reduce((acc: { [key: string]: number }, item: any) => {
+            acc[item.product.id] = item.quantity;
+            return acc;
+          }, {});
+          setCart(cartItems);
+        } catch (error) {
+          console.error('Error fetching cart:', error);
+        }
+      };
+
+      fetchCart();
       fetchProduct();
+      fetchSimilarProducts();
     }
   }, []);
+
+  const addToCart = async (productId: string) => {
+    try {
+      await fetch('/api/cart/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      setCart(prevCart => ({ ...prevCart, [productId]: (prevCart[productId] || 0) + 1 }));
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+    }
+  };
+
+  const removeFromCart = async (productId: string) => {
+    try {
+      await fetch('/api/cart/remove', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      setCart(prevCart => {
+        const newCart = { ...prevCart };
+        if (newCart[productId] > 1) {
+          newCart[productId] -= 1;
+        } else {
+          delete newCart[productId];
+        }
+        return newCart;
+      });
+    } catch (error) {
+      console.error('Error removing from cart:', error);
+    }
+  };
 
   if (!product) {
     return <div>Loading...</div>;
@@ -33,7 +97,7 @@ const ProductPage = () => {
 
   return (
     <div className="product-page">
-      <Card className="product-card">
+      <Card className="product-card w-300px h-338px">
         <div className="p-4">
           <img
             src={product.img || photoPlaceholder.src} // Fallback to placeholder if no image
@@ -44,10 +108,44 @@ const ProductPage = () => {
           <p className="text-gray-500 mt-2">{product.description}</p>
           <div className="flex items-center justify-between mt-4">
             <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
-            <Button size="sm">Add to Cart</Button>
+            <Button size="sm" onClick={() => addToCart(product.id)}>Add to Cart</Button>
           </div>
         </div>
       </Card>
+
+      <div className="similar-products mt-8">
+        <h3 className="text-2xl font-bold mb-4">Similar Products</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          {similarProducts.map((similarProduct: any) => (
+            <Card key={similarProduct.id} className="product-card flex flex-col justify-between">
+              <div className="p-4 flex flex-col flex-grow">
+                <Link href={`/product/${similarProduct.id}`}>
+                  <img
+                    src={similarProduct.img || photoPlaceholder.src}
+                    className="w-full h-40 object-cover rounded-lg"
+                    alt={similarProduct.name}
+                  />
+                  <h4 className="text-xl font-bold mt-4 line-clamp-1">{similarProduct.name}</h4>
+                  <p className="text-gray-500 mt-2 line-clamp-4">{similarProduct.description}</p>
+                </Link>
+                <div className="flex-grow"></div>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-xl font-bold">${similarProduct.price.toFixed(2)}</span>
+                  {cart[similarProduct.id] ? (
+                    <div className="flex items-center">
+                      <button onClick={() => removeFromCart(similarProduct.id)} className="bg-gray-200 rounded-l px-2">-</button>
+                      <span className="px-2">{cart[similarProduct.id]}</span>
+                      <button onClick={() => addToCart(similarProduct.id)} className="bg-gray-200 rounded-r px-2">+</button>
+                    </div>
+                  ) : (
+                    <Button size="sm" onClick={() => addToCart(similarProduct.id)}>Add to Cart</Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
