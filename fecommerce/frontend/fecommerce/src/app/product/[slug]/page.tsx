@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Card, Button } from "@nextui-org/react";
+import { Button, Card } from "@nextui-org/react";
 import '../../page.css';
 import photoPlaceholder from '../../../../public/product photo.jpg';
 import React from 'react';
@@ -96,22 +96,22 @@ const ProductPage = () => {
   }
 
   return (
-    <div className="product-page">
-      <Card className="product-card w-300px h-338px">
-        <div className="p-4">
-          <img
-            src={product.img || photoPlaceholder.src} // Fallback to placeholder if no image
-            className="w-full h-40 object-cover rounded-lg"
-            alt={product.name}
-          />
-          <h4 className="text-xl font-bold mt-4">{product.name}</h4>
-          <p className="text-gray-500 mt-2">{product.description}</p>
+    <div className="product-page p-8">
+      <div className="flex flex-col md:flex-row md:space-x-8">
+        <img
+          src={product.img || photoPlaceholder.src} // Fallback to placeholder if no image
+          className="w-full md:w-1/2 h-auto object-cover rounded-lg"
+          alt={product.name}
+        />
+        <div className="mt-4 md:mt-0 md:w-1/2 flex flex-col">
+          <h1 className="text-3xl font-bold">{product.name}</h1>
+          <p className="text-gray-700 mt-4">{product.description}</p>
           <div className="flex items-center justify-between mt-4">
-            <span className="text-xl font-bold">${product.price.toFixed(2)}</span>
+            <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
             <Button size="sm" onClick={() => addToCart(product.id)}>Add to Cart</Button>
           </div>
         </div>
-      </Card>
+      </div>
 
       <div className="similar-products mt-8">
         <h3 className="text-2xl font-bold mb-4">Similar Products</h3>
