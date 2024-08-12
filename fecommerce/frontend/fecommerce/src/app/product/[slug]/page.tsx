@@ -96,53 +96,68 @@ const ProductPage = () => {
   }
 
   return (
-    <div className="product-page p-8">
-      <div className="flex flex-col md:flex-row md:space-x-8">
+    <div className="product-page">
+      <div className="flex flex-col md:flex-row md:space-x-8 ">
+        <div className='this-product-image'>
         <img
-          src={product.img || photoPlaceholder.src} // Fallback to placeholder if no image
-          className="w-full md:w-1/2 h-auto object-cover rounded-lg"
+          src={product.img || photoPlaceholder.src}
+          className="w-full h-full object-cover rounded-lg"
           alt={product.name}
-        />
+        /></div>
         <div className="mt-4 md:mt-0 md:w-1/2 flex flex-col">
           <h1 className="text-3xl font-bold">{product.name}</h1>
           <p className="text-gray-700 mt-4">{product.description}</p>
           <div className="flex items-center justify-between mt-4">
             <span className="text-2xl font-bold">${product.price.toFixed(2)}</span>
-            <Button size="sm" onClick={() => addToCart(product.id)}>Add to Cart</Button>
+            {cart[product.id] ? (
+                  <div className="flex items-center">
+                    <button onClick={() => removeFromCart(product.id)} className="plus-minus-button bg-gray-200 rounded-xl px-2">-</button>
+                    <span className="px-4">{cart[product.id]}</span>
+                    <button onClick={() => addToCart(product.id)} className="plus-minus-button bg-gray-200 rounded-xl px-2">+</button>
+                  </div>
+                ) : (
+                  <Button className="card-button bg-gray-200 rounded-md" size="sm" onClick={() => addToCart(product.id)}>Add to Cart</Button>
+                )}
           </div>
         </div>
       </div>
-
+      <div className="my-8 flex justify-center">
+        <div className="border-t border-gray-300 w-[600px]"></div>
+      </div>
       <div className="similar-products mt-8">
         <h3 className="text-2xl font-bold mb-4">Similar Products</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {similarProducts.map((similarProduct: any) => (
-            <Card key={similarProduct.id} className="product-card flex flex-col justify-between">
-              <div className="p-4 flex flex-col flex-grow">
-                <Link href={`/product/${similarProduct.id}`}>
-                  <img
-                    src={similarProduct.img || photoPlaceholder.src}
-                    className="w-full h-40 object-cover rounded-lg"
-                    alt={similarProduct.name}
-                  />
-                  <h4 className="text-xl font-bold mt-4 line-clamp-1">{similarProduct.name}</h4>
-                  <p className="text-gray-500 mt-2 line-clamp-4">{similarProduct.description}</p>
-                </Link>
-                <div className="flex-grow"></div>
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-xl font-bold">${similarProduct.price.toFixed(2)}</span>
-                  {cart[similarProduct.id] ? (
-                    <div className="flex items-center">
-                      <button onClick={() => removeFromCart(similarProduct.id)} className="bg-gray-200 rounded-l px-2">-</button>
-                      <span className="px-2">{cart[similarProduct.id]}</span>
-                      <button onClick={() => addToCart(similarProduct.id)} className="bg-gray-200 rounded-r px-2">+</button>
-                    </div>
-                  ) : (
-                    <Button size="sm" onClick={() => addToCart(similarProduct.id)}>Add to Cart</Button>
-                  )}
+            <Card key={similarProduct.id} className="product-card flex flex-col justify-between font-inter">
+            <div className="p-4 flex flex-col flex-grow">
+              <Link href={`/product/${similarProduct.id}`}>
+                <img
+                  src={similarProduct.img}
+                  className="product-image w-full object-cover rounded-lg"
+                  alt={similarProduct.name}
+                />
+                <h4 className="text-lg font-bold mt-1 line-clamp-1">{similarProduct.name}</h4>
+                
+                <p className="text-gray-500 line-clamp-4 text-sm">{similarProduct.description}</p>
+                
+              </Link>
+              <div className="flex-grow"></div>
+              <div className="flex items-center justify-between mt-0.5">
+                <div className="price truncate">
+                <span className="text-md font-bold mx-3.5 truncate">${similarProduct.price.toFixed(2)}</span>
                 </div>
+                {cart[similarProduct.id] ? (
+                  <div className="flex items-center">
+                    <button onClick={() => removeFromCart(similarProduct.id)} className="plus-minus-button bg-gray-200 rounded-xl px-2">-</button>
+                    <span className="px-4">{cart[similarProduct.id]}</span>
+                    <button onClick={() => addToCart(similarProduct.id)} className="plus-minus-button bg-gray-200 rounded-xl px-2">+</button>
+                  </div>
+                ) : (
+                  <Button className="card-button bg-gray-200 rounded-md" size="sm" onClick={() => addToCart(similarProduct.id)}>Add to Cart</Button>
+                )}
               </div>
-            </Card>
+            </div>
+          </Card>
           ))}
         </div>
       </div>

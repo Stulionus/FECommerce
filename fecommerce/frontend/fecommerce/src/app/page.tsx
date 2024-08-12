@@ -114,9 +114,9 @@ const Home: React.FC = () => {
                 </div>
                 {cart[product.id] ? (
                   <div className="flex items-center">
-                    <button onClick={() => removeFromCart(product.id)} className="bg-gray-200 rounded-l px-2">-</button>
-                    <span className="px-2">{cart[product.id]}</span>
-                    <button onClick={() => addToCart(product.id)} className="bg-gray-200 rounded-r px-2">+</button>
+                    <button onClick={() => removeFromCart(product.id)} className="plus-minus-button bg-gray-200 rounded-xl px-2">-</button>
+                    <span className="px-4">{cart[product.id]}</span>
+                    <button onClick={() => addToCart(product.id)} className="plus-minus-button bg-gray-200 rounded-xl px-2">+</button>
                   </div>
                 ) : (
                   <Button className="card-button bg-gray-200 rounded-md" size="sm" onClick={() => addToCart(product.id)}>Add to Cart</Button>
